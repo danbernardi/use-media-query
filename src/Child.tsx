@@ -1,6 +1,7 @@
 import viteLogo from '/vite.svg'
 import './App.css'
-import { useMediaQuery } from './lib/use-media-query'
+import { MediaQueryContext } from './lib/context';
+import { useContext } from 'react';
 
 function Child() {
   const {
@@ -8,7 +9,7 @@ function Child() {
     bpIsGT,
     bpIsLT,
     breakpoints,
-  } = useMediaQuery({ breakpoints: {lg: 1000, md: 800, sm: 400} });
+  } = useContext(MediaQueryContext);
 
   return (
     <>

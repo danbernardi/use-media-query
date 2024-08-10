@@ -14,9 +14,9 @@ import type { Breakpoints, MediaQueryEntry, Options } from './types';
  export function setClassName(
   classObj: Record<keyof Breakpoints | 'default', string>,
   mediaQuery: MediaQueryEntry,
-  options: Options
+  options: Required<Options>
 ): string {
-  const breakPointArr =  Object.keys(options.breakpoints!);
+  const breakPointArr =  Object.keys(options.breakpoints);
   Object.keys(classObj).forEach((key) => {
     if (![...breakPointArr, 'default'].includes(key)) {
       throw new Error(`Bad breakpoint variable given: ${key}. Available breakpoints: ${breakPointArr.join(', ')}`);

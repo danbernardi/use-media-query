@@ -20,9 +20,9 @@ export const noMatch: MediaQueryEntry = {
   query: null,
   value: null,
   rule: null,
-} as const;
+};
 
-type UseMediaQueryReturnType = {
+export type UseMediaQueryReturnType = {
   currentBreakpoint: MediaQueryEntry;
   setClass: (obj: Record<keyof Breakpoints | 'default', string>) => string;
   bpIsGT: (comparison: keyof Breakpoints) => boolean;
@@ -31,7 +31,7 @@ type UseMediaQueryReturnType = {
 };
 
 export const useMediaQuery = (options: Options = {}): UseMediaQueryReturnType => {
-  const config: Options = useMemo(() => ({
+  const config: Required<Options> = useMemo(() => ({
     breakpoints: options.breakpoints ?? defaultBreakpoints,
     rule: options.rule ?? 'min-width',
   }), [options]);
@@ -77,13 +77,14 @@ export const useMediaQuery = (options: Options = {}): UseMediaQueryReturnType =>
     (comparison:  keyof Breakpoints) => bpIsLessThan(comparison, currentBreakpoint, config),
   [currentBreakpoint, config]);
 
-  return { currentBreakpoint, setClass, bpIsGT, bpIsLT, breakpoints: config.breakpoints! };
+  return { currentBreakpoint, setClass, bpIsGT, bpIsLT, breakpoints: config.breakpoints };
 }
 
-export const generateMediaQueries = (options: Options): MediaQueryEntry[] => {
-  const mediaQueryList = [];
+export const generateMediaQueries = (options: Required<Options>): MediaQueryEntry[] => {
+  const mediaQueryList: MediaQueryEntry[] = [];
+  const sortedBreakpoints: string[] = Object.keys(options.breakpoints).sort((a, b) => options.breakpoints[b] - options.breakpoints[a]);
 
-  for (const key in options.breakpoints) {
+  sortedBreakpoints.forEach((key) => {
     const value = options.breakpoints[key];
     const query = window.matchMedia(`only screen and (${options.rule}: ${value}px)`);
     const name = key;
@@ -93,7 +94,7 @@ export const generateMediaQueries = (options: Options): MediaQueryEntry[] => {
       value,
       rule: options.rule || null
     });
-  }
+  })
 
   return mediaQueryList;
 }
