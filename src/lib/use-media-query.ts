@@ -1,24 +1,8 @@
 import { useCallback, useMemo, useSyncExternalStore } from 'react'
+import { Breakpoints, MediaQueryEntry, Options } from './types';
+import { bpIsGreaterThan, bpIsLessThan, setClassName } from './utils';
 
-type Breakpoints = {
-  [key: string]: number
-}
-
-type Rule = 'min-width' | 'max-width';
-
-type Options = {
-  breakpoints?: Breakpoints;
-  rule?: Rule;
-}
-
-type MediaQueryEntry = {
-  breakpoint: string | 'default';
-  query: MediaQueryList | null;
-  value: number | null;
-  rule: Rule | null;
-}
-
-const defaultBreakpoints: Breakpoints = {
+export const defaultBreakpoints: Breakpoints = {
   desktopLg: 1400,
   desktopMd: 1300,
   desktopSm: 1200,
@@ -31,17 +15,28 @@ const defaultBreakpoints: Breakpoints = {
   mobileXsm: 350
 };
 
-const noMatch: MediaQueryEntry = {
-  breakpoint: 'default',
+export const noMatch: MediaQueryEntry = {
+  name: 'default',
   query: null,
   value: null,
   rule: null,
 } as const;
 
-export const useMediaQuery = (options: Options = {}) => {
-  const breakpoints = options.breakpoints ?? defaultBreakpoints;
-  const rule = options.rule ?? 'min-width';
-  const mediaQueries = useMemo(() => generateMediaQueries(breakpoints, rule), [breakpoints, rule]);
+type UseMediaQueryReturnType = {
+  currentBreakpoint: MediaQueryEntry;
+  setClass: (obj: Record<keyof Breakpoints | 'default', string>) => string;
+  bpIsGT: (comparison: keyof Breakpoints) => boolean;
+  bpIsLT: (comparison: keyof Breakpoints) => boolean;
+  breakpoints: Breakpoints;
+};
+
+export const useMediaQuery = (options: Options = {}): UseMediaQueryReturnType => {
+  const config: Options = useMemo(() => ({
+    breakpoints: options.breakpoints ?? defaultBreakpoints,
+    rule: options.rule ?? 'min-width',
+  }), [options]);
+
+  const mediaQueries = useMemo(() => generateMediaQueries(config), [config]);
 
   const subscribe = useCallback(
     (callback: () => void) => {
@@ -58,33 +53,45 @@ export const useMediaQuery = (options: Options = {}) => {
   )
 
   const getSnapshot = useCallback(() => {
-    const mediaQueryList = rule === 'max-width' ? [...mediaQueries].reverse() : [...mediaQueries]; 
-    const match = mediaQueryList.find(entry => entry.query?.matches); 
+    const mediaQueryList = config.rule === 'max-width' ? [...mediaQueries].reverse() : [...mediaQueries]; 
+    const match = mediaQueryList.find(entry => entry.query?.matches);
 
     return match ?? noMatch;
-  }, [mediaQueries, rule])
+  }, [mediaQueries, config.rule])
 
 
-  const current = useSyncExternalStore(
+  const currentBreakpoint = useSyncExternalStore(
     subscribe,
     getSnapshot,
   );
 
-  return current;
+  const setClass = useCallback(
+    (obj: Record<keyof Breakpoints, string | 'breakpoint'>) => setClassName(obj, currentBreakpoint, config),
+  [currentBreakpoint, config]);
+
+  const bpIsGT = useCallback(
+    (comparison: keyof Breakpoints) => bpIsGreaterThan(comparison, currentBreakpoint, config),
+  [currentBreakpoint, config]);
+
+  const bpIsLT = useCallback(
+    (comparison:  keyof Breakpoints) => bpIsLessThan(comparison, currentBreakpoint, config),
+  [currentBreakpoint, config]);
+
+  return { currentBreakpoint, setClass, bpIsGT, bpIsLT, breakpoints: config.breakpoints! };
 }
 
-const generateMediaQueries = (breakpoints: Breakpoints, rule: Rule): MediaQueryEntry[] => {
+export const generateMediaQueries = (options: Options): MediaQueryEntry[] => {
   const mediaQueryList = [];
 
-  for (const key in breakpoints) {
-    const value = breakpoints[key];
-    const query = window.matchMedia(`only screen and (${rule}: ${value}px)`);
-    const breakpoint = key;
+  for (const key in options.breakpoints) {
+    const value = options.breakpoints[key];
+    const query = window.matchMedia(`only screen and (${options.rule}: ${value}px)`);
+    const name = key;
     mediaQueryList.push({
-      breakpoint,
+      name,
       query,
       value,
-      rule
+      rule: options.rule || null
     });
   }
 
