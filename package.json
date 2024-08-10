@@ -1,13 +1,32 @@
 {
   "name": "use-media-query",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
+  "description": "A custom React hook for managing javacript based media queries",
+  "author": "Daniel Bernardi",
+  "license": "MIT",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "types": "./dist/esm/index.d.ts",
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:esm": "tsc --build tsconfig.esm.json",
+    "build:cjs": "tsc --build tsconfig.cjs.json",
+    "prebuild": "rm -rf dist",
+    "build": "npm run build:esm && npm run build:cjs",
+    "postbuild": "./scripts/emit-package-json.sh"
   },
   "dependencies": {
     "react": "^18.3.1",
