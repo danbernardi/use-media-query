@@ -1,12 +1,14 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "composite": true,
     "declarationDir": "dist/cjs",
     "module": "CommonJS",
     "moduleResolution": "node",
     "noEmit": false,
     "outDir": "dist/cjs",
-    "rootDir": "src"
+    "rootDir": "src/lib",
+    "lib": ["ES2015", "DOM"],
   },
   "include": ["src/lib/**/*.ts"]
 }

@@ -1,6 +1,6 @@
 import './App.css'
 import Child from './Child';
-import { MediaQueryProvider } from './lib/context';
+import { MediaQueryProvider } from './context';
 
 function App() {
   return (

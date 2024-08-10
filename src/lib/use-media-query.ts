@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useSyncExternalStore } from 'react'
-import { Breakpoints, MediaQueryEntry, Options } from './types';
 import { bpIsGreaterThan, bpIsLessThan, setClassName } from './utils';
 
 export const defaultBreakpoints: Breakpoints = {
@@ -29,6 +28,24 @@ export type UseMediaQueryReturnType = {
   bpIsLT: (comparison: keyof Breakpoints) => boolean;
   breakpoints: Breakpoints;
 };
+
+export type Breakpoints = {
+  readonly [key: string]: number
+}
+
+export type Rule = 'min-width' | 'max-width';
+
+export type Options = {
+  breakpoints?: Breakpoints;
+  rule?: Rule;
+}
+
+export type MediaQueryEntry = {
+  name: string | 'default';
+  query: MediaQueryList | null;
+  value: number | null;
+  rule: Rule | null;
+}
 
 export const useMediaQuery = (options: Options = {}): UseMediaQueryReturnType => {
   const config: Required<Options> = useMemo(() => ({

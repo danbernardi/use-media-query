@@ -1,4 +1,4 @@
-import type { Breakpoints, MediaQueryEntry, Options } from './types';
+import type { Breakpoints, MediaQueryEntry, Options } from './use-media-query';
 
 /**
  * Returns a string of classes that match / are adjacent to the current breakpoint
@@ -18,7 +18,7 @@ import type { Breakpoints, MediaQueryEntry, Options } from './types';
 ): string {
   const breakPointArr =  Object.keys(options.breakpoints);
   Object.keys(classObj).forEach((key) => {
-    if (![...breakPointArr, 'default'].includes(key)) {
+    if ([...breakPointArr, 'default'].indexOf(key) === -1) {
       throw new Error(`Bad breakpoint variable given: ${key}. Available breakpoints: ${breakPointArr.join(', ')}`);
     }
   });
