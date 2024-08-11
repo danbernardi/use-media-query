@@ -38,7 +38,7 @@ import type { Breakpoints, MediaQueryEntry, Options } from './use-media-query';
     : classObj[firstMatchedKey];
 }
 
-function breakpointFromString(string: string, bps: Breakpoints): number {
+export function breakpointFromString(string: string, bps: Breakpoints): number {
   const breakpoint = bps[string];
 
   if (!breakpoint) {

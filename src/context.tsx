@@ -1,5 +1,6 @@
 import { createContext } from 'react';
-import { useMediaQuery, type UseMediaQueryReturnType, Options } from './lib/use-media-query';
+import { useMediaQuery } from '../dist';
+import type { UseMediaQueryReturnType, Options } from '../dist';
 
 export const MediaQueryContext = createContext<UseMediaQueryReturnType>({} as UseMediaQueryReturnType);
 
