@@ -1,103 +1,94 @@
 # useMediaQuery
-useMediaQuery is a custom react hook that allows the use of css media queries in a react environment.
+useMediaQuery is a custom react hook that allows the use of css media queries in a react environment. It uses the `matchMedia` api to subscribe to media queries and returns the current breakpoint state. It also provides helper functions to make it easier to use the breakpoint state in your components.
 
-### Setup
-
-*npm:*
+### Installation
 ```
-npm install @dbernardi/useMediaQuery
+pnpm add @dbernardi/useMediaQuery
 ```
 
-*yarn:*
-```
-yarn add @dbernardi/useMediaQuery
-```
+## Usage
+While the `useMediaQuery` hook can be called directly by each component that needs to use it, it is recommended to utilize a global state library to manage the state of the hook in a centralized location. This allows the hook to be consumed by any component in the app, and makes sure the media query state is only subscribed to once.
 
-The best way to use these breakpoint helpers is by utilizing React context to set up a custom context provider.
+You can use any state library, for example Redux or Zustand. However, the simplest way to do this is to use [React context](https://react.dev/reference/react/useContext), which is a built-in feature of React.
 
-1. Add the following Provider to the top level of your app -- preferrably wrapping the App component. Breakpoint state will only be available to components that are children of this top level component.
+Examples are provided in typescript below, but the same concepts apply to javascript. Just remove the type annotations.
+
+1. Create a context provider that subscribes to the useMediaQuery hook.
 ``` jsx
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { BreakpointProvider } from '@dbernardi/useMediaQuery';
-import App from './App.js';
+// context.tsx
+import { createContext } from 'react';
+import { useMediaQuery } from '@dbernardi/use-media-query';
+import type { UseMediaQueryReturnType, Options } from '@dbernardi/use-media-query';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <BreakpointProvider>
-      <App />
-    </BreakpointProvider>
-  </React.StrictMode>,
-  document.getElementById('root')
-);
-```
+export const MediaQueryContext = createContext<UseMediaQueryReturnType>({} as UseMediaQueryReturnType);
 
-2. Now, you can simply use the `useMediaQueryContext` hook anywhere in your app to consume the breakpoint state:
-``` jsx
-import { useMediaQueryContext } from '@dbernardi/useMediaQuery';
-import SubComponent from './SubComponent';
-import './App.scss';
-
-
-function App() {
-  const {
-    // See below for information on how each of these variables can be used
-    setClass,
-    bpIsGT,
-    bpIsLT,
-    currentBreakpoint,
-    breakpoints
-  } = useMediaQueryContext();
-
+export const MediaQueryProvider = ({ children, options }: { children: React.ReactElement, options?: Options }) => {
+  const mediaQuery = useMediaQuery(options ?? {});
+  
   return (
-    <div className={ `App ${setClass({ default: '', mobileLg: 'border' })}` }>
-      { bpIsGT('mobileLg') && <SubComponent /> }
-    </div>
-  );
+    <MediaQueryContext.Provider value={mediaQuery}> 
+      { children }
+    </MediaQueryContext.Provider>
+  )
+}
+```
+
+2. Wrap the provider around a component high in your app chain and pass in the options you want to use.
+``` jsx
+// App.tsx
+import { MediaQueryProvider } from './context';
+
+function App({children}: {children: React.ReactElement}) {
+  return (
+    <MediaQueryProvider options={{ breakpoints: { sm: 600, md: 900, lg: 1200 }, rule: 'max-width' }}>
+      {children}
+    </MediaQueryProvider>
+  )
 }
 
 export default App;
-
 ```
 
-You should now be able to make use of the breakpoint state in your components. It should update its value as you resize the width of your browser. Just like our scss handlers, the breakpoint system assumes a desktop first responsive flow. This means that breakpoints are active in reverse order from largest to smallest, with smaller breakpoints overriding larger ones. If your viewport is greater than the largest breakpoint, the `default` breakpoint is active.
 
-*Note: the `useMediaQuery` hook is importable from `@dbernardi/useMediaQuery/useMediaQuery` in case you only need to use this functionality in a single component, and wish to avoid using react context. However, it is not recommended to use this hook if you want to use the breakpoint helpers in more than one component (especially on the same page), because it will create breakpoint event listeners for every `useMediaQuery` instance. To avoid redundant events, use `useMediaQueryContext`.
-
-## Helper functions and integration
-
-In order to allow your components to make use of the breakpoint state, we've provided a series of helper functions, these are automatically returned when using `useMediaQueryContext` but can be imported directly from `@dbernardi/useMediaQuery/useMediaQuery`.
-
-### Adding the helper functions to your component
-
-The helper functions can be destructured from the object returned from `useMediaQueryContext`. This injects the following breakpoint helpers into your component:  
-breakpoints  
-bpIsGT  
-bpIsLT  
-setClass  
-
-The use of these helpers will be explained below.
+3. Now, you can use react's `useContext` hook in conjuction with `MediaQueryContext` to consume the breakpoint state:
 ``` jsx
-import { useMediaQueryContext } from '@dbernardi/useMediaQuery/useMediaQuery';
+import { MediaQueryContext } from './context';
+import { useContext } from 'react';
 
-const Component = (props) => {
-  const { breakpoints, bpIsGT, bpIsLT, setClass } = useMediaQueryContext();
+function Component() {
+  const {
+    setClass,
+    bpIsGT,
+    bpIsLT,
+    breakpoints,
+  } = useContext(MediaQueryContext);
 
   return (
-    <div>
-      Test component
+    <div style={{ backgroundColor: setClass({default: 'pink', lg: 'red', md: 'blue', sm: 'green'}) }}>
+      {bpIsGT('md') && <h1>Show me above md - {breakpoints.md}</h1>}
+      {bpIsLT('md') && <h1>Show me below md - {breakpoints.md}</h1>}
     </div>
-  );
-};
+  )
+}
 
 export default Component;
 ```
 
-#### breakpoints
-`breakpoints` is an object that lists all the available breakpoints. For each breakpoint, the key equals the breakpoint name and the value equals the breakpoint width in pixels.
+## Options
+The following options can be passed to the useMediaQuery hook:
 
-``` js
-const breakpoints = {
+| Option | Description |
+| --- | --- |
+| breakpoints | An object containing the breakpoints you want to use. The key should be the name of the breakpoint and the value should be the size in pixels. |
+| rule | The rule to use when subscribing to the media query. Can be either 'min-width' or 'max-width' to denote whether to use a mobile-first or desktop-first media query. Media queries will be constucted as followed: ``only screen and (${rule}: ${breakpoints[key]}px)``. | 
+
+### Default options
+
+The default options are as follows:
+
+*breakpoints*
+``` ts
+const defaultBreakpoints = {
   desktopLg: 1400,
   desktopMd: 1300,
   desktopSm: 1200,
@@ -111,11 +102,41 @@ const breakpoints = {
 };
 ```
 
+*rule*
+``` ts
+'max-width'
+```
+
+
+## Helper functions & return values
+
+In order to allow your components to make use of the breakpoint state, we've provided a series of helper functions, these are automatically returned from the `useMediaQuery` hook.
+
+```
+const {
+  currentBreakpoint,
+  bpIsGT,
+  bpIsLT,
+  setClass,
+  breakpoints,
+} = useContext(MediaQueryContext);
+```
+
+### currentBreakpoint
+`currentBreakpoint` is an object that contains the current breakpoint state. It has the following properties:
+
+| Property | Description |
+| --- | --- |
+| name | The name of the current breakpoint. This matches one of the keys in the `breakpoints` object passed to the `useMediaQuery` hook. |
+| value | The size of the current breakpoint in pixels. |
+| query | The `MediaQueryList` object that is subscribed to the current breakpoint. |
+| rule | The rule used to subscribe to the current breakpoint. This is the same as the `rule` option passed to the `useMediaQuery` hook. |
+
 #### bpIsGT - breakpointIsGreaterThan
 This function returns a boolean indicating whether the currently active breakpoint is larger than the passed breakpoint param. The breakpoint param is a `string` that matches one of the keys in `breakpoints`.
 
 ```jsx
-bpIsGt('mobileLg')
+bpIsGt('lg')
   ? <p>I will only appear on screens larger than 767px</p>
   : <p>I will only appear on screens smaller than 767px</p>
 ```
@@ -124,7 +145,7 @@ bpIsGt('mobileLg')
 This function returns a boolean indicating whether the currently active breakpoint is smaller than the passed breakpoint param. The breakpoint param is a `string` that matches one of the keys in `breakpoints`.
 
 ```jsx
-bpIsLt('mobileLg')
+bpIsLt('lg')
   ? <p>I will only appear on screens smaller than 767px</p>
   : <p>I will only appear on screens larger than 767px</p>
 ```
@@ -137,9 +158,9 @@ It accepts an object as a param with key value pairs describing which strings sh
 This is most commonly used to change the className of an element based on the active breakpoint:
 ``` jsx
 <div className={ setClass({
-    default: 'larger-than-mobile-lg',
-    mobileLg: 'mobileLg-and-below-but-greater-than-mobileSm',
-    mobileSm: 'mobileSm-and-below'
+    default: 'larger-than-md',
+    md: 'md-and-below-but-greater-than-sm',
+    sm: 'sm-and-below'
   }) }>
   Some content
 </div>
@@ -148,13 +169,13 @@ This is most commonly used to change the className of an element based on the ac
 However, it can also be used anywhere a string can be used. Another example is to use setClass in association with inline styles:
 
 ``` jsx
-import { useMediaQueryContext } from '@dbernardi/useMediaQuery/useMediaQuery';
+import { MediaQueryContext } from './context.ts';
 
 const Component = (props) => {
-  const { setClass } = useMediaQueryContext();
+  const { setClass } = useContext(MediaQueryContext);
 
   const dynamicStyles = {
-    width: setClass({ default: '300px', mobileLg: '500px' })
+    width: setClass({ default: '300px', md: '500px' })
   };
 
   return (
@@ -164,3 +185,6 @@ const Component = (props) => {
   )
 }
 ```
+
+#### breakpoints
+`breakpoints` is an object that lists all the available breakpoints. This is identical to the `breakpoints` option passed to the `useMediaQuery` hook.
