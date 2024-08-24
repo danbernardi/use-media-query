@@ -3,7 +3,7 @@ useMediaQuery is a custom react hook that allows the use of css media queries in
 
 ### Installation
 ```
-pnpm add @dbernardi/useMediaQuery
+pnpm add @dbernardi/use-media-query
 ```
 
 ## Usage

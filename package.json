@@ -1,6 +1,7 @@
 {
   "name": "@dbernardi/use-media-query",
   "version": "0.0.1",
+  "private": false,
   "type": "module",
   "description": "A custom React hook for managing javacript based media queries",
   "author": "Daniel Bernardi",
