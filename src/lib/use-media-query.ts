@@ -104,7 +104,7 @@ export const generateMediaQueries = (options: Required<Options>): MediaQueryEntr
   sortedBreakpoints.forEach((key) => {
     const value = options.breakpoints[key] ?? null;
     const rule = options.rule ?? null;
-    const query = window.matchMedia(`only screen and (${options.rule}: ${value}px)`);
+    const query = typeof window !== 'undefined' ? window.matchMedia(`only screen and (${options.rule}: ${value}px)`) : null;
     const name = key;
     mediaQueryList.push({ value, rule, query, name });
   })
