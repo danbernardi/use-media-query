@@ -136,24 +136,24 @@ const {
 This function returns a boolean indicating whether the currently active breakpoint is larger than the passed breakpoint param. The breakpoint param is a `string` that matches one of the keys in `breakpoints`.
 
 ```jsx
-bpIsGt('lg')
-  ? <p>I will only appear on screens larger than 767px</p>
-  : <p>I will only appear on screens smaller than 767px</p>
+bpIsGt('md')
+  ? <p>I will only appear on screens larger than 900px</p>
+  : <p>I will only appear on screens smaller than 900px</p>
 ```
 
 #### bpIsLT - breakpointIsLessThan
 This function returns a boolean indicating whether the currently active breakpoint is smaller than the passed breakpoint param. The breakpoint param is a `string` that matches one of the keys in `breakpoints`.
 
 ```jsx
-bpIsLt('lg')
-  ? <p>I will only appear on screens smaller than 767px</p>
-  : <p>I will only appear on screens larger than 767px</p>
+bpIsLt('md')
+  ? <p>I will only appear on screens smaller than 900px</p>
+  : <p>I will only appear on screens larger than 900px</p>
 ```
 
 #### setClass
 This function is used to return a string (often but not limited to a className) that matches / is adjacent to the currently active breakpoint.
 
-It accepts an object as a param with key value pairs describing which strings should be returned for which matched breakpoints. For each breakpoint, the value of the match will be returned. The breakpoints are read in reverse order, with larger breakpoints active first. When a breakpoint is active, it will remain active until the next breakpoint key finds a match. It is not necessary to provide values for all of the available breakpoints, only the breakpoints at which point the string should change.
+It accepts an object as a param with key value pairs describing which strings should be returned for which matched breakpoints. For each breakpoint, the value of the match will be returned. When the `rule` option is set to `max-width`, the breakpoints are read in reverse order, with larger breakpoints active first. This behavior is reversed when the `rule` option is set to `min-width`, with smaller breakpoints being active first. When a breakpoint is active, it will remain active until the next breakpoint key finds a match. It is not necessary to provide values for all of the available breakpoints, only the breakpoints at which point the string should change.
 
 This is most commonly used to change the className of an element based on the active breakpoint:
 ``` jsx
