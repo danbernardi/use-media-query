@@ -1,8 +1,12 @@
 {
   "name": "@dbernardi/use-media-query",
-  "version": "0.0.1",
+  "version": "1.0.5",
   "private": false,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danbernardi/use-media-query.git"
+  },
   "description": "A custom React hook for managing javacript based media queries",
   "author": "Daniel Bernardi",
   "license": "MIT",
@@ -17,7 +21,7 @@
     "preview": "vite preview",
     "test": "vitest"
   },
-  "dependencies": {
+  "peerDependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -31,6 +35,8 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.0",
     "vite": "^5.4.0",
-    "vitest": "^2.0.5"
+    "vitest": "^2.0.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   }
 }
