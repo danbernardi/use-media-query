@@ -74,12 +74,20 @@ export const useMediaQuery = (options: Options = {}): UseMediaQueryReturnType =>
     const match = mediaQueryList.find(entry => entry.query?.matches);
 
     return match ?? noMatch;
-  }, [mediaQueries, config.rule])
+  }, [mediaQueries, config.rule]);
+
+  const getServerSnapshot = useCallback(() => {
+    const mediaQueryList = config.rule === 'max-width' ? [...mediaQueries].reverse() : [...mediaQueries]; 
+    const match = mediaQueryList.find(entry => entry.query?.matches);
+
+    return match ?? noMatch
+  }, [mediaQueries, config.rule]);
 
 
   const currentBreakpoint = useSyncExternalStore(
     subscribe,
     getSnapshot,
+    getServerSnapshot,
   );
 
   const setClass = useCallback(
