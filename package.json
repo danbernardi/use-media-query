@@ -3,6 +3,10 @@
   "version": "1.0.4",
   "private": false,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danbernardi/use-media-query.git"
+  },
   "description": "A custom React hook for managing javacript based media queries",
   "author": "Daniel Bernardi",
   "license": "MIT",
